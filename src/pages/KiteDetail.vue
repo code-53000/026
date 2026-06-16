@@ -1,19 +1,23 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { ArrowLeft, Pencil, Trash2, Plus, Calendar, Ruler, Wrench, Wind, MapPin, Clock, Star } from 'lucide-vue-next';
+import { ArrowLeft, Pencil, Trash2, Plus, Calendar, Ruler, Wrench, Wind, MapPin, Clock, Star, Scissors, Check } from 'lucide-vue-next';
 import { useKiteStore } from '@/composables/useKiteStore';
 import { useFlightStore } from '@/composables/useFlightStore';
+import { useCraftStore } from '@/composables/useCraftStore';
 import { formatWingspan, formatDate, formatDuration, formatPerformance, getKiteTypeEmoji, formatWindLevel, getWindEmoji } from '@/utils/format';
+import CraftTimeline from '@/components/craft/CraftTimeline.vue';
 
 const route = useRoute();
 const router = useRouter();
 const kiteStore = useKiteStore();
 const flightStore = useFlightStore();
+const craftStore = useCraftStore();
 
 const kiteId = computed(() => route.params.id as string);
 const kite = computed(() => kiteStore.getKiteById(kiteId.value));
 const flights = computed(() => flightStore.getFlightsByKiteId(kiteId.value));
+const craftProcess = computed(() => craftStore.getProcessByKiteId(kiteId.value));
 
 const avgPerformance = computed(() => {
   if (flights.value.length === 0) return 0;
@@ -38,8 +42,9 @@ function editKite() {
 }
 
 function deleteKite() {
-  if (confirm('确定要删除这只风筝吗？相关的放飞记录也会被删除。')) {
+  if (confirm('确定要删除这只风筝吗？相关的放飞记录和制作工序也会被删除。')) {
     flightStore.deleteFlightsByKiteId(kiteId.value);
+    craftStore.deleteProcessesByKiteId(kiteId.value);
     kiteStore.deleteKite(kiteId.value);
     router.push('/kites');
   }
@@ -57,6 +62,10 @@ function deleteFlight(id: string) {
   if (confirm('确定要删除这条放飞记录吗？')) {
     flightStore.deleteFlight(id);
   }
+}
+
+function goToCraftPanel() {
+  router.push(`/kites/${kiteId.value}/craft`);
 }
 </script>
 
@@ -147,6 +156,106 @@ function deleteFlight(id: string) {
         <h3 class="font-serif font-semibold text-ink mb-3">备注说明</h3>
         <p class="text-ink-light whitespace-pre-wrap">{{ kite.notes }}</p>
       </div>
+    </div>
+
+    <div class="flex items-center justify-between mb-4">
+      <div>
+        <h2 class="text-xl font-serif font-bold text-ink flex items-center gap-2">
+          <Scissors class="w-5 h-5 text-accent" />
+          出身记录 · 制作工序
+        </h2>
+        <div v-if="craftProcess" class="flex items-center gap-4 text-sm text-ink-light mt-1">
+          <span>
+            进度: <span class="text-accent font-medium">{{ craftStore.getProgress(craftProcess).percentage }}%</span>
+          </span>
+          <span>
+            已投入: <span class="text-primary font-medium">{{ formatDuration(craftStore.getCompletedDuration(craftProcess)) }}</span>
+          </span>
+        </div>
+      </div>
+      <button
+        @click="goToCraftPanel"
+        class="flex items-center gap-2 px-4 py-2 bg-accent text-white rounded-lg hover:bg-accent-dark transition-colors"
+      >
+        <Scissors class="w-4 h-4" />
+        {{ craftProcess ? '编辑制作记录' : '开始记录制作' }}
+      </button>
+    </div>
+
+    <div v-if="craftProcess && craftProcess.steps.length > 0" class="mb-6">
+      <CraftTimeline :process="craftProcess" compact />
+
+      <div class="mt-4 space-y-2">
+        <div
+          v-for="(step, idx) in craftStore.getSortedSteps(craftProcess)"
+          :key="step.id"
+          :class="[
+            'flex items-start gap-3 p-4 rounded-xl border transition-all',
+            step.completed ? 'bg-green-50/50 border-green-200' : 'bg-white border-primary/5',
+          ]"
+        >
+          <div
+            :class="[
+              'w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 mt-0.5',
+              step.completed ? 'bg-green-500 border-green-500 text-white' : 'border-primary/30 text-transparent',
+            ]"
+          >
+            <Check class="w-3.5 h-3.5" />
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span
+                :class="[
+                  'font-medium',
+                  step.completed ? 'text-ink-light line-through' : 'text-ink',
+                ]"
+              >
+                {{ idx + 1 }}. {{ step.name || '未命名工序' }}
+              </span>
+              <span v-if="step.durationMinutes > 0" class="text-xs text-ink-light">
+                · {{ formatDuration(step.durationMinutes) }}
+              </span>
+              <span
+                v-if="step.materials.length > 0"
+                class="text-xs text-secondary"
+              >
+                · {{ step.materials.length }} 种材料
+              </span>
+              <span
+                v-if="step.completed && step.completedAt"
+                class="text-xs text-green-600 bg-green-100 px-2 py-0.5 rounded-full"
+              >
+                已完成
+              </span>
+            </div>
+            <p v-if="step.description" class="text-sm text-ink-light mt-1 whitespace-pre-wrap">
+              {{ step.description }}
+            </p>
+            <div v-if="step.materials.length > 0" class="flex flex-wrap gap-1.5 mt-2">
+              <span
+                v-for="mat in step.materials"
+                :key="mat.id"
+                class="inline-flex items-center px-2 py-0.5 bg-secondary/10 text-secondary text-xs rounded-full"
+              >
+                {{ mat.name }} ({{ mat.quantity }})
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div v-else class="mb-6 text-center py-12 bg-white rounded-xl border border-primary/5">
+      <div class="text-5xl mb-3">🛠️</div>
+      <h3 class="text-lg font-serif font-semibold text-ink mb-2">还没有制作记录</h3>
+      <p class="text-ink-light mb-4">记录这只风筝的诞生过程，留下珍贵的出身档案</p>
+      <button
+        @click="goToCraftPanel"
+        class="inline-flex items-center gap-2 px-5 py-2.5 bg-accent text-white rounded-lg hover:bg-accent-dark transition-colors"
+      >
+        <Plus class="w-4 h-4" />
+        开始记录制作
+      </button>
     </div>
 
     <div class="flex items-center justify-between mb-4">

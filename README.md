@@ -9,6 +9,22 @@
 - 卡片式展示，直观美观
 - 支持按风筝类型、适合风力档位筛选
 - 支持关键词搜索
+- 风筝卡片显示制作进度，快速了解制作状态
+
+### 🛠️ 制作工序记录
+- 为每只风筝建立完整的制作工序记录，记录"怎么做的"
+- 自定义每道工序：工序名称、详细说明、材料清单（含用量）、预计耗时、完成状态
+- 工序顺序支持上下调整，灵活编排制作流程
+- 实时进度追踪，一目了然知道当前做到哪一步
+- 时间线式展示，直观呈现制作进度
+- 统计总耗时、已投入时间、使用材料种类
+- 完成后沉淀为风筝的"出身记录"，在档案中永久保留
+
+### 📋 工序模板管理
+- 将成熟的制作流程保存为模板，按风筝类型归类
+- 新建风筝时可自动套用对应类型的工序模板
+- 支持从已有制作记录另存为模板
+- 模板可编辑、删除，方便持续优化工艺流程
 
 ### 📝 放飞日志管理
 - 记录每次放飞的详细数据：日期、使用的风筝、实际风力、放飞地点、飞行时长、飞行表现（1-5星）、备注
@@ -54,6 +70,10 @@ src/
 │   │   ├── CompareChart.vue      # 对比柱状图
 │   │   ├── DistributionChart.vue # 分布饼图
 │   │   └── WindPerformanceChart.vue # 风力表现散点图
+│   ├── craft/           # 制作工序组件
+│   │   ├── CraftProcessCard.vue  # 工序卡片
+│   │   ├── CraftTimeline.vue     # 工序时间线进度
+│   │   └── CraftTemplateSelector.vue # 工序模板选择器
 │   ├── flight/          # 放飞日志组件
 │   │   ├── FlightCard.vue        # 放飞记录卡片
 │   │   ├── FlightFilter.vue      # 放飞筛选器
@@ -68,12 +88,15 @@ src/
 ├── composables/         # 组合式函数
 │   ├── useKiteStore.ts          # 风筝状态管理
 │   ├── useFlightStore.ts        # 放飞日志状态管理
+│   ├── useCraftStore.ts         # 制作工序状态管理（独立模块）
 │   └── useFilter.ts             # 筛选状态管理
 ├── pages/               # 页面组件
 │   ├── Dashboard.vue            # 首页概览
 │   ├── KiteList.vue             # 风筝列表
 │   ├── KiteForm.vue             # 风筝表单页
-│   ├── KiteDetail.vue           # 风筝详情
+│   ├── KiteDetail.vue           # 风筝详情（含出身记录）
+│   ├── CraftPanel.vue           # 工序管理面板
+│   ├── CraftTemplates.vue       # 工序模板管理
 │   ├── FlightList.vue           # 放飞日志列表
 │   ├── FlightForm.vue           # 放飞表单页
 │   └── Analytics.vue            # 数据分析
@@ -169,6 +192,8 @@ npm run lint
 
 - `kite-flyer-kites`：风筝档案数据
 - `kite-flyer-flights`：放飞日志数据
+- `kite-flyer-craft-processes`：制作工序记录数据
+- `kite-flyer-craft-templates`：工序模板数据
 
 **注意**：清除浏览器数据会导致数据丢失，请定期导出备份（后续版本会支持）。
 

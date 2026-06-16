@@ -1,6 +1,8 @@
 const STORAGE_KEYS = {
   KITES: 'kite-flyer-kites',
   FLIGHTS: 'kite-flyer-flights',
+  CRAFT_PROCESSES: 'kite-flyer-craft-processes',
+  CRAFT_TEMPLATES: 'kite-flyer-craft-templates',
 };
 
 export function loadFromStorage<T>(key: string): T[] {
@@ -38,4 +40,20 @@ export function saveFlights(data: unknown[]) {
 
 export function generateId(): string {
   return Date.now().toString(36) + Math.random().toString(36).substr(2);
+}
+
+export function loadCraftProcesses() {
+  return loadFromStorage(STORAGE_KEYS.CRAFT_PROCESSES) as unknown[];
+}
+
+export function saveCraftProcesses(data: unknown[]) {
+  saveToStorage(STORAGE_KEYS.CRAFT_PROCESSES, data);
+}
+
+export function loadCraftTemplates() {
+  return loadFromStorage(STORAGE_KEYS.CRAFT_TEMPLATES) as unknown[];
+}
+
+export function saveCraftTemplates(data: unknown[]) {
+  saveToStorage(STORAGE_KEYS.CRAFT_TEMPLATES, data);
 }

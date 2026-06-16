@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useRouter, useRoute } from 'vue-router';
-import { Home, Wind, FileText, BarChart3, Menu, X } from 'lucide-vue-next';
+import { Home, Wind, FileText, BarChart3, Menu, X, Scissors } from 'lucide-vue-next';
 import { ref } from 'vue';
 
 const router = useRouter();
@@ -11,6 +11,7 @@ const navItems = [
   { path: '/', label: '首页', icon: Home },
   { path: '/kites', label: '风筝档案', icon: Wind },
   { path: '/flights', label: '放飞日志', icon: FileText },
+  { path: '/craft-templates', label: '工序模板', icon: Scissors },
   { path: '/analytics', label: '数据分析', icon: BarChart3 },
 ];
 

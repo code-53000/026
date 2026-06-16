@@ -1,8 +1,10 @@
 <script setup lang="ts">
+import { computed } from 'vue';
 import { useRouter } from 'vue-router';
-import { Pencil, Trash2, Calendar, Ruler, Wrench } from 'lucide-vue-next';
+import { Pencil, Trash2, Calendar, Ruler, Wrench, Scissors } from 'lucide-vue-next';
 import type { Kite } from '@/types';
 import { formatWingspan, getKiteTypeEmoji, formatDate } from '@/utils/format';
+import { useCraftStore } from '@/composables/useCraftStore';
 
 interface Props {
   kite: Kite;
@@ -16,9 +18,21 @@ const emit = defineEmits<{
 }>();
 
 const router = useRouter();
+const craftStore = useCraftStore();
+
+const craftProgress = computed(() => {
+  const process = craftStore.getProcessByKiteId(props.kite.id);
+  if (!process) return null;
+  return craftStore.getProgress(process);
+});
 
 function viewDetail() {
   router.push(`/kites/${props.kite.id}`);
+}
+
+function goToCraft(e: Event) {
+  e.stopPropagation();
+  router.push(`/kites/${props.kite.id}/craft`);
 }
 </script>
 
@@ -68,6 +82,34 @@ function viewDetail() {
         <span v-if="flightCount !== undefined" class="ml-2 text-xs text-ink-light">
           已放飞 {{ flightCount }} 次
         </span>
+      </div>
+
+      <div v-if="craftProgress" class="mb-4">
+        <div class="flex items-center justify-between mb-1">
+          <span class="text-xs text-ink-light flex items-center gap-1">
+            <Scissors class="w-3 h-3 text-accent" />
+            制作进度
+          </span>
+          <span class="text-xs font-medium" :class="craftProgress.percentage === 100 ? 'text-green-600' : 'text-accent'">
+            {{ craftProgress.percentage }}%
+          </span>
+        </div>
+        <div class="h-1.5 bg-primary/10 rounded-full overflow-hidden">
+          <div
+            :class="[
+              'h-full rounded-full transition-all',
+              craftProgress.percentage === 100 ? 'bg-green-500' : 'bg-accent',
+            ]"
+            :style="{ width: `${craftProgress.percentage}%` }"
+          />
+        </div>
+        <button
+          @click="goToCraft"
+          class="mt-2 w-full flex items-center justify-center gap-1 py-1.5 text-xs text-accent hover:bg-accent/5 rounded-md transition-colors"
+        >
+          <Scissors class="w-3 h-3" />
+          {{ craftProgress.percentage === 0 ? '开始制作' : craftProgress.percentage === 100 ? '查看出身记录' : '继续制作' }}
+        </button>
       </div>
 
       <div class="flex gap-2" @click.stop>

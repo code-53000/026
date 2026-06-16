@@ -6,6 +6,8 @@ import KiteDetail from '@/pages/KiteDetail.vue';
 import FlightList from '@/pages/FlightList.vue';
 import FlightForm from '@/pages/FlightForm.vue';
 import Analytics from '@/pages/Analytics.vue';
+import CraftPanel from '@/pages/CraftPanel.vue';
+import CraftTemplates from '@/pages/CraftTemplates.vue';
 
 const router = createRouter({
   history: createWebHistory(),
@@ -36,6 +38,11 @@ const router = createRouter({
       component: KiteForm,
     },
     {
+      path: '/kites/:id/craft',
+      name: 'kite-craft',
+      component: CraftPanel,
+    },
+    {
       path: '/flights',
       name: 'flight-list',
       component: FlightList,
@@ -54,6 +61,11 @@ const router = createRouter({
       path: '/analytics',
       name: 'analytics',
       component: Analytics,
+    },
+    {
+      path: '/craft-templates',
+      name: 'craft-templates',
+      component: CraftTemplates,
     },
   ],
 });

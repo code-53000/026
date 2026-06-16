@@ -46,3 +46,63 @@ export const WIND_LEVEL_RANGES: WindLevelRange[] = ['1-2级轻风', '3-4级和�
 export const FRAME_MATERIALS = ['竹子', '碳杆', '玻璃纤维', '其他'];
 
 export const WIND_LEVELS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+
+export interface CraftMaterial {
+  id: string;
+  name: string;
+  quantity: string;
+}
+
+export interface CraftStep {
+  id: string;
+  name: string;
+  description: string;
+  materials: CraftMaterial[];
+  durationMinutes: number;
+  completed: boolean;
+  completedAt?: string;
+  order: number;
+}
+
+export interface CraftProcess {
+  id: string;
+  kiteId: string;
+  steps: CraftStep[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CraftTemplate {
+  id: string;
+  name: string;
+  kiteType: KiteType;
+  steps: {
+    name: string;
+    description: string;
+    materials: Omit<CraftMaterial, 'id'>[];
+    durationMinutes: number;
+    order: number;
+  }[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export const DEFAULT_CRAFT_STEP_NAMES = [
+  '选竹备料',
+  '削骨成形',
+  '绑扎骨架',
+  '糊面蒙皮',
+  '彩绘装饰',
+  '系线调试',
+];
+
+export function createEmptyCraftStep(order: number): Omit<CraftStep, 'id'> {
+  return {
+    name: '',
+    description: '',
+    materials: [],
+    durationMinutes: 0,
+    completed: false,
+    order,
+  };
+}
