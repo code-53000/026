@@ -4,10 +4,19 @@ import { Wind, FileText, BarChart3, Plus, Trophy, Calendar, Wind as WindIcon } f
 import { useKiteStore } from '@/composables/useKiteStore';
 import { useFlightStore } from '@/composables/useFlightStore';
 import StatsCard from '@/components/layout/StatsCard.vue';
+import { WIND_LEVEL_RANGES } from '@/types';
+import type { WindLevelRange } from '@/types';
 
 const router = useRouter();
 const kiteStore = useKiteStore();
 const flightStore = useFlightStore();
+
+const windLevelStyles: Record<WindLevelRange, { emoji: string; class: string }> = {
+  '1-2级轻风': { emoji: '🍃', class: 'bg-green-100 text-green-700' },
+  '3-4级和风': { emoji: '🌬️', class: 'bg-blue-100 text-blue-700' },
+  '5-6级清劲风': { emoji: '💨', class: 'bg-yellow-100 text-yellow-700' },
+  '7级以上强风': { emoji: '🌪️', class: 'bg-red-100 text-red-700' },
+};
 
 function navigate(path: string) {
   router.push(path);
@@ -110,27 +119,18 @@ function navigate(path: string) {
             根据您的风筝档案，以下风筝适合在不同风力条件下放飞：
           </p>
           <div class="flex flex-wrap gap-2 mt-3">
-            <span
-              v-for="kite in kiteStore.getKitesByWindLevel('1-2级轻风').slice(0, 3)"
-              :key="kite.id"
-              class="inline-flex items-center gap-1 px-3 py-1.5 bg-green-100 text-green-700 rounded-full text-sm"
-            >
-              🍃 {{ kite.name }}
-            </span>
-            <span
-              v-for="kite in kiteStore.getKitesByWindLevel('3-4级和风').slice(0, 3)"
-              :key="kite.id"
-              class="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-100 text-blue-700 rounded-full text-sm"
-            >
-              🌬️ {{ kite.name }}
-            </span>
-            <span
-              v-for="kite in kiteStore.getKitesByWindLevel('5-6级清劲风').slice(0, 3)"
-              :key="kite.id"
-              class="inline-flex items-center gap-1 px-3 py-1.5 bg-yellow-100 text-yellow-700 rounded-full text-sm"
-            >
-              💨 {{ kite.name }}
-            </span>
+            <template v-for="range in WIND_LEVEL_RANGES" :key="range">
+              <span
+                v-for="kite in kiteStore.getKitesByWindLevel(range).slice(0, 3)"
+                :key="kite.id"
+                :class="[
+                  'inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-sm',
+                  windLevelStyles[range].class
+                ]"
+              >
+                {{ windLevelStyles[range].emoji }} {{ kite.name }}
+              </span>
+            </template>
           </div>
         </div>
       </div>
